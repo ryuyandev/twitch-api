@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - master
-env:
-  IMAGE_NAME: twitch-api
 
 jobs:
   push:
@@ -13,11 +11,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build image
-        run: docker build . --tag $IMAGE_NAME
+        run: docker build . --tag ghcr.io/${{ github.repository }}:latest --tag ghcr.io/${{ github.repository }}:$GITHUB_SHA
       - name: Log into registry
         run: echo ${{ secrets.CR_PAT }} | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
       - name: Push image
-        run: |
-          docker pull ghcr.io/${{ github.repository }}:latest
-          docker build . --tag ghcr.io/${{ github.repository }}:$GITHUB_SHA --cache-from ghcr.io/${{ github.repository }}:latest
-          docker push ghcr.io/${{ github.repository }}:$GITHUB_SHA
+        run: docker push ghcr.io/${{ github.repository }} --all-tags
